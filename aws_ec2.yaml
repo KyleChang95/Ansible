@@ -1,0 +1,93 @@
+---
+- name: Configure AWS EC2
+  hosts: AWS_EC2
+  gather_facts: False
+  become: True
+
+  tasks:
+    - name: Install required packages
+      apt:
+        name:
+          - git
+          - curl
+          - build-essential
+          - python3-pip
+          - libkrb5-dev
+          - openjdk-11-jre
+        update_cache: yes
+
+    - name: Create workspace directory
+      file:
+        path: ~/workspace
+        state: directory
+        owner: ubuntu
+        group: ubuntu
+
+    - name: Create git commit template
+      copy:
+        content: "ki1040/tasks#"
+        dest: ~/workspace/git_commit_template.txt
+        owner: ubuntu
+        group: ubuntu
+
+    - name: Configure git
+      git_config:
+        name="{{ item.name }}"
+        scope=global
+        value="{{ item.value }}"
+      with_items:
+        - {name: "user.name",  value: "Kyle.Chang" }
+        - {name: "user.email", value: "Kyle.Chang@acer.com" }
+        - {name: "core.editor",   value: "vim" }
+        - {name: "http.sslVerify", value: false }
+        - {name: "commit.template", value: "~/workspace/git_commit_template.txt" }
+    #   # git_config:
+    #   #   name: user.name
+    #   #   scope: global
+    #   #   value: "Kyle.Chang"
+    #   # git_config:
+    #   #   name: user.email
+    #   #   scope: global
+    #   #   value: "Kyle.Chang@acer.com"
+    #   # git_config:
+    #   #   name: core.editor
+    #   #   scope: global
+    #   #   value: "vim"
+    #   # git_config:
+    #   #   name: http.sslVerify
+    #   #   scope: global
+    #   #   value: false
+    #   # git_config:
+    #   #   name: commit.template
+    #   #   scope: global
+    #   #   value: ~/workspace/git_commit_template.txt
+
+    # - name: Install NVM, Node.js, Yarn, TypeScript
+    #   shell: |
+    #     curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
+    #     source ~/.bashrc
+    #     nvm install v16.16.0
+    #     npm install --global yarn typescript
+    #   environment:
+    #     HOME: /home/ubuntu
+    #   become_user: ubuntu
+
+    # - name: Install Docker and Docker Compose
+    #   shell: |
+    #     curl -fsSL https://get.docker.com | sudo bash -
+    #     sudo usermod -aG docker $USER
+    #     sudo curl -k -fsSL "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+    #     sudo chmod +x /usr/local/bin/docker-compose
+    #     sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
+    #   become: True
+
+    # - name: Install Python virtualenv and AWS CLI
+    #   shell: |
+    #     sudo pip3 install virtualenv
+    #     virtualenv -p python3 ~/venv
+    #     echo 'source ~/venv/bin/activate' >> ~/.bashrc
+    #     source ~/venv/bin/activate
+    #     pip3 install awscli aws-adfs
+    #   environment:
+    #     HOME: /home/ubuntu
+    #   become_user: ubuntu
